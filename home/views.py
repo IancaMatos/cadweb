@@ -13,3 +13,4 @@ def categoria(request):
     }
     return render(request, 'categoria/lista.html',contexto)
 
+
