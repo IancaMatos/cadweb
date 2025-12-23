@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+
+{% block titulo_conteudo  %} Formulário de ctegoria {% endblock %}
+
+
+{% block conteudo  %}  
+
+
+ <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }} 
+         <button onclick="location='{% url "categoria" %}'" class= "btn btn-secondary mb-4" type="button">Voltar</button>
+
+        <button  class= "btn btn-primary mb-4" type="submit">Salvar</button>
+
+    </form>
+
+{% endblock %}
