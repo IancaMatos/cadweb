@@ -1,3 +1,4 @@
+from datetime import date
 from django import forms
 from .models import *
 
@@ -22,4 +23,20 @@ class CategoriaForm(forms.ModelForm):
         if ordem <= 0:
             raise forms.ValidationError("O campo ordem deve ser maior que zero.")
         return ordem
+    
+class ClienteForm(forms.ModelForm):
+    class Meta:
+        model = Cliente
+        fields = ['nome', 'cpf', 'datanasc']
+        widgets = {
+            'nome':forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nome'}),
+            'cpf':forms.TextInput(attrs={'class': 'cpf form-control', 'placeholder': 'C.P.F'}),
+            'datanasc': forms.DateInput(attrs={'class': 'data form-control', 'placeholder': 'Data de Nascimento'}, format='%d/%m/%Y'),
+        }
+
+    def clean_datanasc(self):
+        datanasc = self.cleaned_data.get('datanasc')
+        if datanasc and datanasc > date.today():
+             raise forms.ValidationError("A data de nascimento não pode ser maior que a data atual.")
+        return datanasc
         

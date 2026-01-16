@@ -1,0 +1,21 @@
+
+ {% extends 'base.html' %}
+
+
+{% block titulo_conteudo  %} Formulário de cliente {% endblock %}
+
+
+{% block conteudo  %}  
+
+
+ <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }} 
+         <button onclick="location='{% url "cliente" %}'" class= "btn btn-secondary mb-4" type="button">Voltar</button>
+
+         
+        <button  class= "btn btn-primary mb-4" type="submit">Salvar</button>
+
+    </form>
+
+{% endblock %} 
