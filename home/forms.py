@@ -69,4 +69,17 @@ class ProdutoForm(forms.ModelForm):
         self.fields['preco'].localize = True
         self.fields['preco'].widget.is_localized = True   
 
+# ************************************Estoque*******************************************     
+
+class EstoqueForm(forms.ModelForm):
+    class Meta:
+        model = Estoque
+        fields = ['produto','qtde']
+        
+        widgets = {
+            'produto': forms.HiddenInput(),  # Campo oculto para armazenar o ID do produto
+            'qtde':forms.TextInput(attrs={'class': 'inteiro form-control',}),
+    }
+
+
         

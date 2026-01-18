@@ -163,7 +163,7 @@ def editar_produto(request, id):
             return redirect('produto')
     else:
         form = ProdutoForm(instance=produto)
-    return render(request, 'produto/form.html', {'form': form})
+    return render(request, 'produto/formulario.html', {'form': form})
 
 def remover_produto(request, id):
     try:
@@ -177,7 +177,24 @@ def remover_produto(request, id):
 def detalhes_produto(request, id):
     try:
         produto = Produto.objects.get(pk=id)
-        return render(request, 'produto/detalhes.html', {'item': produto})
+        return render(request, 'produto/detalhes.html', {'produto': produto})
     except Produto.DoesNotExist:
         messages.error(request, 'Registro não encontrado')
         return redirect('produto')
+    
+    
+# ************************************Estoque*******************************************  
+def ajustar_estoque(request, id):
+    produto = produto = Produto.objects.get(pk=id)
+    estoque = produto.estoque # pega o objeto estoque relacionado ao produto
+    if request.method == 'POST':
+        form = EstoqueForm(request.POST, instance=estoque)
+        if form.is_valid():
+            estoque = form.save()
+            lista = []
+            lista.append(estoque.produto) 
+            return render(request, 'produto/lista.html', {'lista': lista})
+    else:
+         form = EstoqueForm(instance=estoque)
+    return render(request, 'produto/ajustar_estoque.html', {'form': form,})
+

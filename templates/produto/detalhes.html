@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+
+{% block titulo  %} Contato {% endblock %}
+
+
+{% block titulo_conteudo %} Detalhes do Produto {% endblock %}
+
+
+
+
+
+
+{% block conteudo  %}  
+   
+<p>
+   <label >ID:</label><br>
+   <span class="form-control">{{produto.id}}</span>
+  
+</p>
+
+
+<p>
+   <label >Nome:</label><br>
+   <span class="form-control">{{produto.nome}}</span>
+</p>
+
+
+<p>
+   <label >Preoço R$:</label><br>
+   <span class="form-control">{{produto.preco}}</span>
+</p>
+
+
+<p>
+   <label >Imagen:</label><br>
+   <span class="form-control"> 
+      <img  src="{{produto.img_base64}} " width="200" height="200">
+    </span>
+</p>
+
+
+
+<button onclick="location='{% url "produto" %}'" class="btn btn-secondary btn-sm" type="button" >Voltar</button>
+
+
+{% endblock %}
+
+
+
+
+
+
+
+
+
+
+
+
+

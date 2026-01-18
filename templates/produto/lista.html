@@ -10,27 +10,38 @@
 
 </div>
 
-<table class="table table-hover">
+<table class="table table-hover" style="margin-top:15px" class="table table-bordered">
     <thead>
       <tr>
         <th>ID</th>
+        <th>#</th>
         <th>Nome</th>
         <th>Preço(R$)</th>
         <th>Categoria</th>
-         <th>Ações</th>
+        <th>Qtde</th>
+        <th>Ações</th>
       </tr>
     </thead>
     <tbody>
     {% for produto in lista %}
       <tr>
         <td>{{ produto.id }}</td>
+        <td> 
+       
+      <img  src="{{produto.img_base64}} " width="35" height="35">
+ 
+  </td>
         <td>{{ produto.nome }}</td>
         <td>{{ produto.preco}}</td>
         <td>{{ produto.categoria }}</td>
+        <td>{{produto.estoque.qtde}}</td>
         <td>
-          <button onclick="location='#'" class="btn btn-info btn-sm">Detalhes </button>
+
+          
+          <button onclick="location='{% url "detalhes_produto" produto.id %}'" class="btn btn-info btn-sm">Detalhes </button>
+          <button onclick="location='{% url "ajustar_estoque" produto.id %}'" class="btn btn-success btn-sm">Estoque </button>
           <a href="{% url 'editar_produto' produto.id %}" class="btn btn-warning btn-sm">Editar</a>
-          <a href="{% url 'remover_produto' produto.id %}" class="btn btn-danger btn-sm" 
+          <a href="{% url 'remover_produto' produto.id %}" class="btn btn-danger btn-sm"
           onclick="return confirm('Tem certeza que deseja remover este registro?');">Remover</a>
         </td>
       </tr>
