@@ -34,10 +34,10 @@
             <td>
                 <button onclick="location='{% url "detalhes_categoria" item.id %}'" class="btn btn-info">Detalhes </button>
                 
-                <button onclick="location='{% url "editar_categoria" item.id %}'" class="btn btn-warning">Alterar </button>
+                <button onclick="location='{% url "editar_categoria" item.id %}'" class="btn btn-warning">Editar </button>
                 
                 <a href="{% url 'remover_categoria' item.id %}" class="btn btn-danger"
-                onclick="return confirm('Tem certeza que deseja remover este registro?');">Excluir</a>
+                onclick="return confirm('Tem certeza que deseja remover este registro?');">Remover</a>
             </td>
         </tr>
         {% endfor %}

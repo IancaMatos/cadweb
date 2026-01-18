@@ -23,7 +23,7 @@ class CategoriaForm(forms.ModelForm):
         if ordem <= 0:
             raise forms.ValidationError("O campo ordem deve ser maior que zero.")
         return ordem
-    
+# ************************************Cliente*******************************************    
 class ClienteForm(forms.ModelForm):
     class Meta:
         model = Cliente
@@ -39,4 +39,34 @@ class ClienteForm(forms.ModelForm):
         if datanasc and datanasc > date.today():
              raise forms.ValidationError("A data de nascimento não pode ser maior que a data atual.")
         return datanasc
+    
+# ************************************Produto*******************************************  
+class ProdutoForm(forms.ModelForm):
+    class Meta:
+        model = Produto
+        fields = ['nome', 'preco', 'categoria','img_base64']
+        widgets = {
+            'categoria': forms.Select(attrs={'class': 'form-control'}),
+            'nome':forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nome'}),
+            'img_base64': forms.HiddenInput(), 
+            # a classe money mascara a entreda de valores monetários, está em base.html
+            #  jQuery Mask Plugin
+            'preco':forms.TextInput(attrs={
+                'class': 'money form-control',
+                'maxlength': 500,
+                'placeholder': '0.000,00'
+            }),
+        }
+        
+        labels = {
+            'nome': 'Nome do Produto',
+            'preco': 'Preço do Produto',
+        }
+
+
+    def __init__(self, *args, **kwargs):
+        super(ProdutoForm, self).__init__(*args, **kwargs)
+        self.fields['preco'].localize = True
+        self.fields['preco'].widget.is_localized = True   
+
         

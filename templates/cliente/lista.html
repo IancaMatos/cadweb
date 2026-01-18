@@ -19,8 +19,8 @@
 
         <tr>
             <th scope="col">ID</th>
-            <th scope="col">Descrição</th>
-            <th scope="col">Ordem</th>
+            <th scope="col">Nome</th>
+            <th scope="col">CPF</th>
             <th scope="col">Data de Nascimento</th>
         </tr>
     </thead>
@@ -33,13 +33,11 @@
             <td> {{item.cpf}} </td>
             <td> {{item.datanascimento}} </td>
             <td>
-                {% comment %} <button onclick="location='{% url "detalhes_cliente" item.id %}'" class="btn btn-info">Detalhes </button> {% endcomment %}
-                
-                <button onclick="location='{% url "editar_cliente" item.id %}'" class="btn btn-warning">Alterar </button>
-                 <button onclick="location='{% url "detalhes_cliente" item.id %}'" class="btn btn-info">Detalhes </button>
-                
+
+                <button onclick="location='{% url "detalhes_cliente" item.id %}'" class="btn btn-info">Detalhes </button>
+                <button onclick="location='{% url "editar_cliente" item.id %}'" class="btn btn-warning">Editar </button>
                 <a href="{% url 'remover_cliente' item.id %}" class="btn btn-danger"
-                onclick="return confirm('Tem certeza que deseja remover este registro?');">Excluir</a>
+                onclick="return confirm('Tem certeza que deseja remover este registro?');">Remover</a>
             </td>
         </tr>
         {% endfor %}
