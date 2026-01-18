@@ -17,10 +17,10 @@ urlpatterns = [
     path('cliente/remover/<int:id>/', views.remover_cliente, name="remover_cliente"),   
 
 # ************************************Produto*******************************************  
-    path('produto/', views.produto, name="produto"),
-    path('produto/form', views.form_produto, name="form_produto"),
-    path('produto/editar/<int:id>/', views.editar_produto, name="editar_produto"),
-    path('produto/remover/<int:id>/', views.remover_produto, name="remover_produto"),
-    path('produto/detalhes/<int:id>/', views.detalhes_produto, name="detalhes_produto"),
+    path('produto/', views.produto, name='produto'),
+    path('produto/form/', views.form_produto, name='form_produto'),
+    path('produto/editar/<int:id>/', views.editar_produto, name='editar_produto'),
+    path('produto/remover/<int:id>/', views.remover_produto, name='remover_produto'),
+    path('produto/detalhes/<int:id>/', views.detalhes_produto, name='detalhes_produto'),
     
 ]

@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect
 from django.contrib import messages  # <--- Importação necessária do slide
 from .models import *
 from .forms import *
@@ -78,14 +78,14 @@ def cliente(request):
 
 def form_cliente(request):
     if request.method == 'POST':
-        form = ProdutoForm(request.POST)
+        form = ClienteForm(request.POST)
         if form.is_valid():
             form.save()
             # Mensagem de sucesso adicionada
             messages.success(request, 'Operação realizada com Sucesso')
             return redirect('cliente')
     else:
-        form = ProdutoForm()
+        form = ClienteForm()
     
     contexto = {
         'form': form,
@@ -109,14 +109,14 @@ def editar_cliente(request, id):
         return redirect('cliente')
 
     if request.method == 'POST':
-        form = ProdutoForm(request.POST, instance=cliente)
+        form = ClienteForm(request.POST, instance=cliente)
         if form.is_valid():
             cliente = form.save()
             # Mensagem de sucesso adicionada
             messages.success(request, 'Operação realizada com Sucesso')
             return redirect('cliente')
     else:
-        form = ProdutoForm(instance=cliente)
+        form = ClienteForm(instance=cliente)
         
     return render(request, 'cliente/formulario.html', {'form': form})
 
@@ -132,55 +132,52 @@ def remover_cliente(request, id):
 
 # ************************************Produto******************************************* 
 def produto(request):
-    """Lista todos os produtos"""
     contexto = {
         'lista': Produto.objects.all().order_by('-id'),
     }
     return render(request, 'produto/lista.html', contexto)
 
 def form_produto(request):
-    """Cria um novo produto"""
     if request.method == 'POST':
         form = ProdutoForm(request.POST)
         if form.is_valid():
             form.save()
-            messages.success(request, 'Produto cadastrado com sucesso!')
+            messages.success(request, 'Operação realizada com Sucesso')
             return redirect('produto')
-        else:
-            messages.error(request, 'Erro ao validar o formulário. Verifique os dados.')
     else:
         form = ProdutoForm()
-    
     return render(request, 'produto/formulario.html', {'form': form})
 
 def editar_produto(request, id):
-    """Edita um produto existente"""
-    produto_instancia = get_object_or_404(Produto, pk=id)
-    
+    try:
+        produto = Produto.objects.get(pk=id)
+    except Produto.DoesNotExist:
+        messages.error(request, 'Registro não encontrado')
+        return redirect('produto')
+
     if request.method == 'POST':
-        # Importante: passar a instância para o formulário salvar no registro correto
-        form = ProdutoForm(request.POST, instance=produto_instancia)
+        form = ProdutoForm(request.POST, instance=produto)
         if form.is_valid():
             form.save()
-            messages.success(request, 'Produto atualizado com sucesso!')
+            messages.success(request, 'Operação realizada com Sucesso')
             return redirect('produto')
     else:
-        # Carrega o formulário preenchido com os dados do produto
-        form = ProdutoForm(instance=produto_instancia)
-        
-    return render(request, 'produto/formulario.html', {'form': form})
-
-def detalhes_produto(request, id):
-    """Exibe os detalhes de um único produto"""
-    produto_detalhe = get_object_or_404(Produto, pk=id)
-    return render(request, 'produto/detalhes.html', {'produto': produto_detalhe})
+        form = ProdutoForm(instance=produto)
+    return render(request, 'produto/form.html', {'form': form})
 
 def remover_produto(request, id):
-    """Remove um produto"""
-    produto_instancia = get_object_or_404(Produto, pk=id)
-    
-    if request.method == 'POST' or request.method == 'GET':
-        produto_instancia.delete()
-        messages.success(request, 'Produto removido com sucesso!')
-        
+    try:
+        produto = Produto.objects.get(pk=id)
+        produto.delete()
+        messages.success(request, 'Registro excluído com sucesso')
+    except Produto.DoesNotExist:
+        messages.error(request, 'Registro não encontrado')
     return redirect('produto')
+
+def detalhes_produto(request, id):
+    try:
+        produto = Produto.objects.get(pk=id)
+        return render(request, 'produto/detalhes.html', {'item': produto})
+    except Produto.DoesNotExist:
+        messages.error(request, 'Registro não encontrado')
+        return redirect('produto')
