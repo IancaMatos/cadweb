@@ -2,7 +2,11 @@ from django.shortcuts import render, redirect
 from django.contrib import messages  # <--- Importação necessária do slide
 from .models import *
 from .forms import *
+from django.http import JsonResponse
+from django.apps import apps
 
+
+# ************************************Categoria******************************************* 
 def index(request):
     return render(request, 'index.html')
 
@@ -205,6 +209,112 @@ def ajustar_estoque(request, id):
 # ************************************Testes*******************************************  
 def teste1(request):
      return render(request,'testes/teste1.html')
+
+
+def teste2(request):
+     return render(request,'testes/teste2.html')
+
+
+def buscar_dados(request, app_modelo):
+    termo = request.GET.get('q', '') # pega o termo digitado
+    try:
+        # Divida o app e o modelo
+        app, modelo = app_modelo.split('.')
+        modelo = apps.get_model(app, modelo)
+    except LookupError:
+        return JsonResponse({'error': 'Modelo não encontrado'}, status=404)
+    
+    # Verifica se o modelo possui os campos 'nome' e 'id'
+    if not hasattr(modelo, 'nome') or not hasattr(modelo, 'id'):
+        return JsonResponse({'error': 'Modelo deve ter campos "id" e "nome"'}, status=400)
+    
+    resultados = modelo.objects.filter(nome__icontains=termo)
+    dados = [{'id': obj.id, 'nome': obj.nome} for obj in resultados]
+    return JsonResponse(dados, safe=False)
+
+
+# ************************************Pedido******************************************* 
+def pedido(request):
+    lista = Pedido.objects.all().order_by('-id')  # Obtém todos os registros
+    return render(request, 'pedido/lista.html', {'lista': lista})
+
+
+# ************************************NOVO Pedido******************************************* 
+def novo_pedido(request,id):
+    if request.method == 'GET':
+        try:
+            cliente = Cliente.objects.get(pk=id)
+        except Cliente.DoesNotExist:
+            # Caso o registro não seja encontrado, exibe a mensagem de erro
+            messages.error(request, 'Registro não encontrado')
+            return redirect('cliente')  # Redireciona para a listagem
+        # cria um novo pedido com o cliente selecionado
+        pedido = Pedido(cliente=cliente)
+        form = PedidoForm(instance=pedido)# cria um formulario com o novo pedido
+        return render(request, 'pedido/formulario.html',{'form': form,})
+    else: # se for metodo post, salva o pedido.
+        form = PedidoForm(request.POST)
+        if form.is_valid():
+            pedido = form.save()
+            return redirect('pedido')
+        
+# ************************************Detalhe Pedido******************************************* 
+def detalhes_pedido(request, id):
+    try:
+        pedido = Pedido.objects.get(pk=id)
+    except Pedido.DoesNotExist:
+        # Caso o registro não seja encontrado, exibe a mensagem de erro
+        messages.error(request, 'Registro não encontrado')
+        return redirect('pedido')  # Redireciona para a listagem    
+    
+    if request.method == 'GET':
+        itemPedido = ItemPedido(pedido=pedido)
+        form = ItemPedidoForm(instance=itemPedido)
+    else:
+        form = ItemPedidoForm(request.POST)
+        # aguardando implementação POST, salvar item
+    
+    contexto = {
+        'pedido': pedido,
+        'form': form,
+    }
+    return render(request, 'pedido/detalhes.html',contexto )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

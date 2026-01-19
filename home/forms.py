@@ -46,7 +46,8 @@ class ProdutoForm(forms.ModelForm):
         model = Produto
         fields = ['nome', 'preco', 'categoria','img_base64']
         widgets = {
-            'categoria': forms.Select(attrs={'class': 'form-control'}),
+            # 'categoria': forms.Select(attrs={'class': 'form-control'}),
+            'categoria': forms.HiddenInput(),  #campo oculto para armazenar apenas id
             'nome':forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nome'}),
             'img_base64': forms.HiddenInput(), 
             # a classe money mascara a entreda de valores monetários, está em base.html
@@ -81,5 +82,26 @@ class EstoqueForm(forms.ModelForm):
             'qtde':forms.TextInput(attrs={'class': 'inteiro form-control',}),
     }
 
+# ************************************Pedido******************************************* 
+class PedidoForm(forms.ModelForm):
+    class Meta:
+        model = Pedido
+        fields = ['cliente']
+        widgets = {
+            'cliente': forms.HiddenInput(),  # Campo oculto para armazenar o ID
+        }
+        
+# ************************************DetalhePedido******************************************* 
+class ItemPedidoForm(forms.ModelForm):
+    class Meta:
+        model = ItemPedido
+        fields = ['pedido','produto', 'qtde']
+
+
+        widgets = {
+            'pedido': forms.HiddenInput(),  # Campo oculto para armazenar o ID
+            'produto': forms.HiddenInput(),  # Campo oculto para armazenar o ID
+            'qtde':forms.TextInput(attrs={'class': 'form-control',}),
+        }
 
         

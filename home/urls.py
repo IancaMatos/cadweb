@@ -26,6 +26,13 @@ urlpatterns = [
     path('produto/ajustar_estoque/<int:id>/', views.ajustar_estoque, name='ajustar_estoque'),
 
     #*****************testes***********************
-    path('teste1/', views.teste1, name='teste1'),
     
+    path('teste1/', views.teste1, name='teste1'),
+    path('teste2/', views.teste2, name='teste2'),
+    path('buscar_dados/<str:app_modelo>/',views.buscar_dados, name='buscar_dados'),
+
+# ************************************Pedido******************************************* 
+    path('pedido/', views.pedido, name='pedido'),
+    path('pedido/formulario/<int:id>', views.novo_pedido, name='novo_pedido'),
+    path('pedido/detalhes/<int:id>/', views.detalhes_pedido, name='detalhes_pedido'),
 ]
