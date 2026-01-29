@@ -263,63 +263,98 @@ def detalhes_pedido(request, id):
     try:
         pedido = Pedido.objects.get(pk=id)
     except Pedido.DoesNotExist:
-        # Caso o registro não seja encontrado, exibe a mensagem de erro
         messages.error(request, 'Registro não encontrado')
-        return redirect('pedido')  # Redireciona para a listagem    
-    
+        return redirect('pedido')
+
     if request.method == 'GET':
         itemPedido = ItemPedido(pedido=pedido)
         form = ItemPedidoForm(instance=itemPedido)
     else:
         form = ItemPedidoForm(request.POST)
-        # aguardando implementação POST, salvar item
-    
+        if form.is_valid():
+            item_pedido = form.save(commit=False) # [cite: 21]
+            item_pedido.preco = item_pedido.produto.preco # [cite: 23]
+            
+            # Tratamento de Estoque [cite: 26]
+            estoque_atual = item_pedido.produto.estoque
+            
+            # Verifica se há estoque suficiente [cite: 27]
+            if estoque_atual.qtde < item_pedido.qtde:
+                messages.error(request, 'Estoque insuficiente para este produto') # [cite: 28]
+            else:
+                # Decrementa o estoque [cite: 31]
+                estoque_atual.qtde -= item_pedido.qtde
+                estoque_atual.save() # Salva a alteração no estoque
+                
+                item_pedido.save() # Salva o item do pedido [cite: 33]
+                messages.success(request, 'Produto adicionado com sucesso') # [cite: 43]
+                return redirect('detalhes_pedido', id=id)
+
     contexto = {
         'pedido': pedido,
         'form': form,
     }
-    return render(request, 'pedido/detalhes.html',contexto )
+    return render(request, 'pedido/detalhes.html', contexto)
 
+def editar_item_pedido(request, id):
+    try:
+        item_pedido = ItemPedido.objects.get(pk=id)
+    except ItemPedido.DoesNotExist:
+        messages.error(request, 'Registro não encontrado')
+        return redirect('pedido')
+    
+    pedido = item_pedido.pedido
+    quantidade_anterior = item_pedido.qtde # Armazena a quantidade anterior [cite: 55]
 
+    if request.method == 'POST':
+        form = ItemPedidoForm(request.POST, instance=item_pedido)
+        if form.is_valid():
+            item_pedido = form.save(commit=False)
+            
+            # Lógica de atualização de estoque na edição [cite: 61]
+            estoque = item_pedido.produto.estoque
+            
+            # Devolvemos a quantidade anterior ao estoque para recalcular
+            estoque.qtde += quantidade_anterior 
+            
+            # Verificamos se o estoque (agora cheio) suporta a nova quantidade [cite: 57]
+            if estoque.qtde < item_pedido.qtde:
+                messages.error(request, 'Estoque insuficiente para a nova quantidade') # [cite: 59]
+                # Reverte o estoque ao estado original (opcional, mas seguro)
+                estoque.qtde -= quantidade_anterior
+            else:
+                # Consome a nova quantidade
+                estoque.qtde -= item_pedido.qtde
+                estoque.save()
+                item_pedido.save()
+                messages.success(request, 'Item atualizado com sucesso')
+                return redirect('detalhes_pedido', id=pedido.id) # [cite: 64]
+                
+    else:
+        form = ItemPedidoForm(instance=item_pedido)
+    
+    contexto = {
+        'pedido': pedido,
+        'form': form,
+        'item_pedido': item_pedido, # para exibir qual item está sendo editado
+    }
+    return render(request, 'pedido/detalhes.html', contexto)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+def remover_item_pedido(request, id):
+    try:
+        item_pedido = ItemPedido.objects.get(pk=id)
+        pedido_id = item_pedido.pedido.id
+        estoque = item_pedido.produto.estoque
+        
+        # Devolve a quantidade ao estoque antes de excluir [cite: 78]
+        estoque.qtde += item_pedido.qtde
+        estoque.save()
+        
+        item_pedido.delete()
+        messages.success(request, 'Item removido com sucesso')
+        
+        return redirect('detalhes_pedido', id=pedido_id)
+        
+    except ItemPedido.DoesNotExist:
+        messages.error(request, 'Registro não encontrado')
+        return redirect('pedido')

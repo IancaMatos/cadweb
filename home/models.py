@@ -90,7 +90,18 @@ class Pedido(models.Model):
         if self.data_pedido:
             return self.data_pedido.strftime('%d/%m/%Y %H:%M')
         return None
-    
+    @property
+    def total(self):
+        """Calcula o total de todos os itens no pedido"""
+        # [cite: 69]
+        return sum(item.total for item in self.itempedido_set.all())
+
+    @property
+    def qtdeItens(self):
+        """Conta a qtde de itens no pedido"""
+        # [cite: 69]
+        return self.itempedido_set.count()
+
 # ************************************ItemPedido******************************************* 
 class ItemPedido(models.Model):
     pedido = models.ForeignKey(Pedido, on_delete=models.CASCADE)
@@ -102,3 +113,8 @@ class ItemPedido(models.Model):
     def __str__(self):
         return f"{self.produto.nome} (Qtd: {self.qtde}) - Preço Unitário: {self.preco}"    
 
+    @property
+    def total(self):
+        """Calcula o total do item (qtde * preco)"""
+        # [cite: 75]
+        return self.qtde * self.preco

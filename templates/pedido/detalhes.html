@@ -49,16 +49,19 @@
             <th>Ações</th>
         </tr>
     </thead>
-    <tbody>
+<tbody>
         {% for item in pedido.itempedido_set.all %}
         <tr>
+            <td>{{ item.produto.id }}</td>
+            <td><img src="{{ item.produto.img_base64 }}" width="50" /></td>
+            
             <td>{{ item.produto.nome }}</td>
             <td>{{ item.qtde }}</td>
             <td>{{ item.preco }}</td>
-            <td>?</td>
-            <td>
-              <a href="#" class="btn btn-warning btn-sm">Editar</a>
-              <a href="#" class="btn btn-danger btn-sm" 
+            <td>{{ item.total }}</td> <td>
+              <a href="{% url 'editar_item_pedido' item.id %}" class="btn btn-warning btn-sm">Editar</a>
+              
+              <a href="{% url 'remover_item_pedido' item.id %}" class="btn btn-danger btn-sm" 
               onclick="return confirm('Tem certeza que deseja remover este item?');">Remover</a>
             </td>         
         </tr>
