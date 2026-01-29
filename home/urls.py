@@ -14,14 +14,14 @@ urlpatterns = [
     path('login/', LoginView.as_view(template_name='login.html'), name='login'),
     path('logout/', LogoutView.as_view(next_page='login'), name='logout'),
 
-# ************************************Cliente*******************************************  
+# ************************************Cliente*******************************************
     path('cliente/', views.cliente, name="cliente"),
     path('cliente/form', views.form_cliente, name="form_cliente"),
     path('cliente/detalhes/<int:id>/', views.detalhes_cliente, name="detalhes_cliente"),
     path('cliente/editar/<int:id>/', views.editar_cliente, name="editar_cliente"),
     path('cliente/remover/<int:id>/', views.remover_cliente, name="remover_cliente"),   
 
-# ************************************Produto*******************************************  
+# ************************************Produto******************************************* 
     path('produto/', views.produto, name='produto'),
     path('produto/form/', views.form_produto, name='form_produto'),
     path('produto/editar/<int:id>/', views.editar_produto, name='editar_produto'),
@@ -40,8 +40,17 @@ urlpatterns = [
     path('pedido/', views.pedido, name='pedido'),
     path('pedido/formulario/<int:id>', views.novo_pedido, name='novo_pedido'),
     path('pedido/detalhes/<int:id>/', views.detalhes_pedido, name='detalhes_pedido'),
-    path('pedido/remover/<int:id>/', views.remover_pedido, name='remover_pedido'),
     path('pedido/item/<int:id>/editar/', views.editar_item_pedido, name='editar_item_pedido'),
     path('pedido/item/<int:id>/remover/', views.remover_item_pedido, name='remover_item_pedido'),
+    
+    # Adicionando a rota para remover o pedido (que foi solicitado anteriormente)
+    path('pedido/remover/<int:id>/', views.remover_pedido, name='remover_pedido'),
+    
+    # Rotas de Pagamento
+    path('pedido/pagamento/<int:id>/', views.form_pagamento, name='form_pagamento'),
+    path('pedido/pagamento/editar/<int:id>/', views.editar_pagamento, name='editar_pagamento'),
+    path('pedido/pagamento/remover/<int:id>/', views.remover_pagamento, name='remover_pagamento'),
+
+    # Rota Nota Fiscal
     path('pedido/nota_fiscal/<int:id>/', views.nota_fiscal, name='nota_fiscal'),
 ]
