@@ -2,6 +2,7 @@ import locale
 from django.db import models
 from datetime import datetime
 import random
+from decimal import Decimal # <--- IMPORTAÇÃO NECESSÁRIA
 
 class Categoria(models.Model):
     nome = models.CharField(max_length=100)
@@ -83,7 +84,9 @@ class Pedido(models.Model):
     @property
     def total(self):
         """Calcula o total de todos os itens no pedido"""
-        return sum(item.total for item in self.itempedido_set.all())
+        # Se não houver itens, retorna Decimal(0)
+        soma = sum(item.total for item in self.itempedido_set.all())
+        return soma if soma else Decimal('0.00')
 
     @property
     def qtdeItens(self):
@@ -98,43 +101,46 @@ class Pedido(models.Model):
     
     @property
     def total_pago(self):
-        return sum(pagamento.valor for pagamento in self.pagamentos.all())
+        soma = sum(pagamento.valor for pagamento in self.pagamentos.all())
+        return soma if soma else Decimal('0.00')
     
     @property
     def debito(self):
         return self.total - self.total_pago
 
     # --- Cálculos de Impostos (Desafio Nota Fiscal) ---
+    # Convertemos os números float para Decimal('string') para evitar erro de tipo
     @property
     def icms(self):
-        return self.total * 0.18 # 18%
+        return self.total * Decimal('0.18') # 18%
 
     @property
     def ipi(self):
-        return self.total * 0.04 # 4%
+        return self.total * Decimal('0.04') # 4%
 
     @property
     def pis(self):
-        return self.total * 0.0165 # 1.65%
+        return self.total * Decimal('0.0165') # 1.65%
     
     @property
     def cofins(self):
-        return self.total * 0.076 # 7.6%
+        return self.total * Decimal('0.076') # 7.6%
 
     @property
     def total_impostos(self):
         """Soma de todos os impostos calculados"""
-        return float(self.icms) + float(self.ipi) + float(self.pis) + float(self.cofins)
+        return self.icms + self.ipi + self.pis + self.cofins
 
     @property
     def total_com_impostos(self):
         """Total dos produtos + impostos"""
-        return float(self.total) + self.total_impostos
+        return self.total + self.total_impostos
 
     @property
     def chave_acesso(self):
         """Gera uma chave de acesso aleatória para a NF"""
         ano = datetime.now().year
+        # Gera um número aleatório grande para simular a chave
         random_part = random.randint(100000000000000000000000000000, 999999999999999999999999999999)
         return f"{ano}{self.id:04d}{random_part}"
 
