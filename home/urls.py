@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from django.contrib.auth.views import LoginView, LogoutView
 
 urlpatterns = [
     path('', views.index, name="index"),
@@ -8,6 +9,10 @@ urlpatterns = [
     path('categoria/editar/<int:id>/', views.editar_categoria, name="editar_categoria"),
     path('categoria/remover/<int:id>/', views.remover_categoria, name="remover_categoria"),
     path('categoria/detalhes/<int:id>/', views.detalhes_categoria, name="detalhes_categoria"),
+
+    # Rotas de Autenticação
+    path('login/', LoginView.as_view(template_name='login.html'), name='login'),
+    path('logout/', LogoutView.as_view(next_page='login'), name='logout'),
 
 # ************************************Cliente*******************************************  
     path('cliente/', views.cliente, name="cliente"),
