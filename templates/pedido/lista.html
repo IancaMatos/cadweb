@@ -35,7 +35,9 @@
             <td>{{ pedido.get_status_display }}</td>
             <td>{{ pedido.qtdeItens }}</td>  <td>{{ pedido.total }}</td>      <td>
               <button onClick="location='{% url 'detalhes_pedido' pedido.id %}'" type="button" class="btn btn-primary btn-sm">Detalhes</button>
-              </td>
+              <a href="{% url 'remover_pedido' pedido.id %}" class="btn btn-danger btn-sm" 
+              onclick="return confirm('Tem certeza que deseja remover este pedido?');">Remover
+            </td>
           </tr>
           {% endfor %}
         </tbody>

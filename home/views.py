@@ -244,10 +244,22 @@ def buscar_dados(request, app_modelo):
 
 
 # ************************************Pedido*******************************************
+
 @login_required
 def pedido(request):
     lista = Pedido.objects.all().order_by('-id')  # Obtém todos os registros
     return render(request, 'pedido/lista.html', {'lista': lista})
+
+@login_required
+def remover_pedido(request, id):
+    try:
+        pedido = Pedido.objects.get(pk=id)
+        pedido.delete()
+        messages.success(request, 'Pedido removido com sucesso')
+    except Pedido.DoesNotExist:
+        messages.error(request, 'Pedido não encontrado')
+        
+    return redirect('pedido')
 
 
 # ************************************NOVO Pedido*******************************************
