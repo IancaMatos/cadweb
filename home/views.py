@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from django.contrib import messages  # <--- Importação necessária do slide
+from django.contrib import messages
 from .models import *
 from .forms import *
 from django.http import JsonResponse
@@ -7,11 +7,11 @@ from django.apps import apps
 from django.contrib.auth.decorators import login_required
 
 
-# ************************************Categoria******************************************* 
-
+# ************************************Categoria*******************************************
 @login_required
 def index(request):
     return render(request, 'index.html')
+
 @login_required
 def categoria(request):
     contexto = {
@@ -25,7 +25,6 @@ def form_categoria(request):
         form = CategoriaForm(request.POST)
         if form.is_valid():
             form.save()
-            # Mensagem de sucesso adicionada
             messages.success(request, 'Operação realizada com Sucesso')
             return redirect('categoria')
     else:
@@ -48,7 +47,6 @@ def editar_categoria(request, id):
         form = CategoriaForm(request.POST, instance=categoria)
         if form.is_valid():
             categoria = form.save()
-            # Mensagem de sucesso adicionada
             messages.success(request, 'Operação realizada com Sucesso')
             return redirect('categoria')
     else:
@@ -78,8 +76,7 @@ def detalhes_categoria(request, id):
     return render(request, 'categoria/detalhes.html', {'categoria': categoria})
 
 
-# ************************************Cliente******************************************* 
-
+# ************************************Cliente*******************************************
 @login_required
 def cliente(request):
     contexto = {
@@ -93,7 +90,6 @@ def form_cliente(request):
         form = ClienteForm(request.POST)
         if form.is_valid():
             form.save()
-            # Mensagem de sucesso adicionada
             messages.success(request, 'Operação realizada com Sucesso')
             return redirect('cliente')
     else:
@@ -126,7 +122,6 @@ def editar_cliente(request, id):
         form = ClienteForm(request.POST, instance=cliente)
         if form.is_valid():
             cliente = form.save()
-            # Mensagem de sucesso adicionada
             messages.success(request, 'Operação realizada com Sucesso')
             return redirect('cliente')
     else:
@@ -145,8 +140,7 @@ def remover_cliente(request, id):
         
     return redirect('cliente')
 
-# ************************************Produto******************************************* 
-
+# ************************************Produto*******************************************
 @login_required
 def produto(request):
     contexto = {
@@ -204,8 +198,7 @@ def detalhes_produto(request, id):
         return redirect('produto')
     
     
-# ************************************Estoque*******************************************  
-
+# ************************************Estoque*******************************************
 @login_required
 def ajustar_estoque(request, id):
     produto = produto = Produto.objects.get(pk=id)
@@ -222,11 +215,7 @@ def ajustar_estoque(request, id):
     return render(request, 'produto/ajustar_estoque.html', {'form': form,})
 
 
-
-
-
-# ************************************Testes*******************************************  
-
+# ************************************Testes*******************************************
 @login_required
 def teste1(request):
      return render(request,'testes/teste1.html')
@@ -254,16 +243,14 @@ def buscar_dados(request, app_modelo):
     return JsonResponse(dados, safe=False)
 
 
-# ************************************Pedido******************************************* 
-
+# ************************************Pedido*******************************************
 @login_required
 def pedido(request):
     lista = Pedido.objects.all().order_by('-id')  # Obtém todos os registros
     return render(request, 'pedido/lista.html', {'lista': lista})
 
 
-# ************************************NOVO Pedido******************************************* 
-
+# ************************************NOVO Pedido*******************************************
 @login_required
 def novo_pedido(request, id):
     if request.method == 'GET':
@@ -279,12 +266,9 @@ def novo_pedido(request, id):
         form = PedidoForm(request.POST)
         if form.is_valid():
             pedido = form.save()
-            # --- ALTERAÇÃO AQUI (Slide Extras) ---
-            # Ao invés de voltar para a lista ('pedido'), vai para os detalhes adicionar itens
             return redirect('detalhes_pedido', id=pedido.id)
         
-# ************************************Detalhe Pedido******************************************* 
-
+# ************************************Detalhe Pedido*******************************************
 @login_required
 def detalhes_pedido(request, id):
     try:
@@ -299,22 +283,22 @@ def detalhes_pedido(request, id):
     else:
         form = ItemPedidoForm(request.POST)
         if form.is_valid():
-            item_pedido = form.save(commit=False) # [cite: 21]
-            item_pedido.preco = item_pedido.produto.preco # [cite: 23]
+            item_pedido = form.save(commit=False)
+            item_pedido.preco = item_pedido.produto.preco
             
-            # Tratamento de Estoque [cite: 26]
+            # Tratamento de Estoque
             estoque_atual = item_pedido.produto.estoque
             
-            # Verifica se há estoque suficiente [cite: 27]
+            # Verifica se há estoque suficiente
             if estoque_atual.qtde < item_pedido.qtde:
-                messages.error(request, 'Estoque insuficiente para este produto') # [cite: 28]
+                messages.error(request, 'Estoque insuficiente para este produto')
             else:
-                # Decrementa o estoque [cite: 31]
+                # Decrementa o estoque
                 estoque_atual.qtde -= item_pedido.qtde
                 estoque_atual.save() # Salva a alteração no estoque
                 
-                item_pedido.save() # Salva o item do pedido [cite: 33]
-                messages.success(request, 'Produto adicionado com sucesso') # [cite: 43]
+                item_pedido.save() # Salva o item do pedido
+                messages.success(request, 'Produto adicionado com sucesso')
                 return redirect('detalhes_pedido', id=id)
 
     contexto = {
@@ -332,31 +316,25 @@ def editar_item_pedido(request, id):
         return redirect('pedido')
     
     pedido = item_pedido.pedido
-    quantidade_anterior = item_pedido.qtde # Armazena a quantidade anterior [cite: 55]
+    quantidade_anterior = item_pedido.qtde
 
     if request.method == 'POST':
         form = ItemPedidoForm(request.POST, instance=item_pedido)
         if form.is_valid():
             item_pedido = form.save(commit=False)
             
-            # Lógica de atualização de estoque na edição [cite: 61]
             estoque = item_pedido.produto.estoque
-            
-            # Devolvemos a quantidade anterior ao estoque para recalcular
             estoque.qtde += quantidade_anterior 
             
-            # Verificamos se o estoque (agora cheio) suporta a nova quantidade [cite: 57]
             if estoque.qtde < item_pedido.qtde:
-                messages.error(request, 'Estoque insuficiente para a nova quantidade') # [cite: 59]
-                # Reverte o estoque ao estado original (opcional, mas seguro)
+                messages.error(request, 'Estoque insuficiente para a nova quantidade')
                 estoque.qtde -= quantidade_anterior
             else:
-                # Consome a nova quantidade
                 estoque.qtde -= item_pedido.qtde
                 estoque.save()
                 item_pedido.save()
                 messages.success(request, 'Item atualizado com sucesso')
-                return redirect('detalhes_pedido', id=pedido.id) # [cite: 64]
+                return redirect('detalhes_pedido', id=pedido.id)
                 
     else:
         form = ItemPedidoForm(instance=item_pedido)
@@ -364,7 +342,7 @@ def editar_item_pedido(request, id):
     contexto = {
         'pedido': pedido,
         'form': form,
-        'item_pedido': item_pedido, # para exibir qual item está sendo editado
+        'item_pedido': item_pedido,
     }
     return render(request, 'pedido/detalhes.html', contexto)
 
@@ -375,7 +353,6 @@ def remover_item_pedido(request, id):
         pedido_id = item_pedido.pedido.id
         estoque = item_pedido.produto.estoque
         
-        # Devolve a quantidade ao estoque antes de excluir [cite: 78]
         estoque.qtde += item_pedido.qtde
         estoque.save()
         
@@ -387,3 +364,77 @@ def remover_item_pedido(request, id):
     except ItemPedido.DoesNotExist:
         messages.error(request, 'Registro não encontrado')
         return redirect('pedido')
+
+# ************************************Pagamento*******************************************
+@login_required
+def form_pagamento(request, id):
+    try:
+        pedido = Pedido.objects.get(pk=id)
+    except Pedido.DoesNotExist:
+        messages.error(request, 'Registro não encontrado')
+        return redirect('pedido')  
+    
+    if request.method == 'POST':
+        form = PagamentoForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Pagamento registrado com sucesso')
+            return redirect('form_pagamento', id=id) # Recarrega a mesma página
+    else:
+        # Prepara formulário para novo pagamento
+        pagamento = Pagamento(pedido=pedido)
+        form = PagamentoForm(instance=pagamento)
+        
+    contexto = {
+        'pedido': pedido,
+        'form': form,
+    }    
+    return render(request, 'pedido/pagamento.html', contexto)
+
+@login_required
+def editar_pagamento(request, id):
+    try:
+        pagamento = Pagamento.objects.get(pk=id)
+    except Pagamento.DoesNotExist:
+        messages.error(request, 'Registro não encontrado')
+        return redirect('pedido')
+
+    pedido_id = pagamento.pedido.id
+
+    if request.method == 'POST':
+        form = PagamentoForm(request.POST, instance=pagamento)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Pagamento atualizado com sucesso')
+            return redirect('form_pagamento', id=pedido_id)
+    else:
+        form = PagamentoForm(instance=pagamento)
+
+    contexto = {
+        'pedido': pagamento.pedido,
+        'form': form,
+    }
+    return render(request, 'pedido/pagamento.html', contexto)
+
+@login_required
+def remover_pagamento(request, id):
+    try:
+        pagamento = Pagamento.objects.get(pk=id)
+        pedido_id = pagamento.pedido.id
+        pagamento.delete()
+        messages.success(request, 'Pagamento removido com sucesso')
+        return redirect('form_pagamento', id=pedido_id)
+    except Pagamento.DoesNotExist:
+        messages.error(request, 'Registro não encontrado')
+        return redirect('pedido')
+
+# ************************************Nota Fiscal*******************************************
+@login_required
+def nota_fiscal(request, id):
+    try:
+        pedido = Pedido.objects.get(pk=id)
+    except Pedido.DoesNotExist:
+        messages.error(request, 'Registro não encontrado')
+        return redirect('pedido')
+        
+    return render(request, 'pedido/nota_fiscal.html', {'pedido': pedido})

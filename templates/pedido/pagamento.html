@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block titulo_conteudo %} Registro de Pagamento {% endblock titulo_conteudo %}
+
+{% block conteudo %} 
+
+<div class="card mb-3">
+    <div class="card-body">
+        <p><strong>Pedido:</strong> {{ pedido.id }} - {{ pedido.cliente.nome }} - {{ pedido.get_status_display }}</p>
+        <p><strong>Data:</strong> {{ pedido.data_pedidof }}</p>
+        
+        <hr>
+        <div class="row">
+            <div class="col-md-4">
+                <strong>Total do Pedido:</strong> R$ {{ pedido.total|floatformat:2 }}
+            </div>
+            <div class="col-md-4 text-success">
+                <strong>Total Pago:</strong> R$ {{ pedido.total_pago|floatformat:2 }}
+            </div>
+            <div class="col-md-4 text-danger">
+                <strong>Débito:</strong> R$ {{ pedido.debito|floatformat:2 }}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mb-3">
+    <div class="card-header">Novo Pagamento</div>
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}    
+            {{ form.as_p }}
+            <button class="btn btn-primary btn-sm" type="submit">Salvar</button>
+            <button type="button" onclick="location='{% url 'detalhes_pedido' pedido.id %}'" class="btn btn-secondary btn-sm">Voltar</button>
+        </form>
+    </div>
+</div>
+
+<h5>Pagamentos Realizados</h5>
+<table class="table table-hover table-bordered">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Valor (R$)</th>
+            <th>Forma</th>
+            <th>Data</th>
+            <th>Ações</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for pagamento in pedido.pagamentos %}
+        <tr>
+            <td>{{ pagamento.id }}</td>
+            <td>{{ pagamento.valor }}</td>
+            <td>{{ pagamento.get_forma_display }}</td>
+            <td>{{ pagamento.data_pgtof }}</td>
+            <td>
+                <a href="{% url 'editar_pagamento' pagamento.id %}" class="btn btn-warning btn-sm">Editar</a>
+                <a href="{% url 'remover_pagamento' pagamento.id %}" class="btn btn-danger btn-sm" 
+                   onclick="return confirm('Tem certeza que deseja remover este registro?');">Excluir</a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="5" class="text-center">Nenhum pagamento registrado.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock conteudo %}

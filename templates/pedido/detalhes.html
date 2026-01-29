@@ -1,21 +1,22 @@
 {% extends "base.html" %}
 
-
 {% block titulo_conteudo %} Detalhes do Pedido #{{ pedido.id }} {% endblock titulo_conteudo %}
 
-
 {% block conteudo %} 
-
 
 <p><strong>Cliente:</strong> {{ pedido.cliente.nome }}</p>
 <p><strong>Data do Pedido:</strong> {{ pedido.data_pedidof }}</p>
 <p><strong>Status:</strong> {{ pedido.get_status_display }}</p>
 
+<div class="alert alert-secondary mt-3">
+    <div class="row">
+        <div class="col-md-4"><strong>Total do Pedido:</strong> R$ {{ pedido.total|floatformat:2 }}</div>
+        <div class="col-md-4 text-success"><strong>Total Pago:</strong> R$ {{ pedido.total_pago|floatformat:2 }}</div>
+        <div class="col-md-4 text-danger"><strong>Débito:</strong> R$ {{ pedido.debito|floatformat:2 }}</div>
+    </div>
+</div>
 
 <hr>
-<!-- Formulário para adicionar novos produtos -->
-
-
 <h5>Adicionar Produto</h5>
 <form method="POST">
     {% csrf_token %}
@@ -29,19 +30,18 @@
     </p>
     {{ form.as_p }}
     <button type="submit" class="btn btn-primary btn-sm">Salvar Produto</button>
-    <button type="button" onclick="location=''" class="btn btn-primary btn-sm">Registrar Pagamento</button>
+    
+    <button type="button" onclick="location='{% url 'form_pagamento' pedido.id %}'" class="btn btn-success btn-sm">Registrar Pagamento</button>
+    
+    <a href="{% url 'nota_fiscal' pedido.id %}" target="_blank" class="btn btn-info btn-sm">Nota Fiscal</a>
 </form>
 
-
-
-
 <hr>
-<!-- Tabela de Itens já adicionados ao pedido -->
-
 <h5>Itens do Pedido</h5>
-<table class="table table-striped align-middle"> <thead>
+<table class="table table-striped align-middle"> 
+    <thead>
         <tr>
-            <th>ID</th>      <th>#</th>       <th>Produto</th>
+            <th>ID</th> <th>#</th> <th>Produto</th>
             <th>Quantidade</th>
             <th>Preço Unitário (R$)</th>
             <th>Total (R$)</th>
@@ -52,7 +52,6 @@
         {% for item in pedido.itempedido_set.all %}
         <tr>
             <td>{{ item.produto.id }}</td>
-            
             <td>
                 {% if item.produto.img_base64 %}
                     <img src="{{ item.produto.img_base64 }}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 5px;">
@@ -60,13 +59,10 @@
                     <span class="text-muted">Sem img</span>
                 {% endif %}
             </td>
-
             <td>{{ item.produto.nome }}</td>
             <td>{{ item.qtde }}</td>
             <td>{{ item.preco }}</td>
-            
             <td>{{ item.total }}</td> 
-            
             <td>
               <a href="{% url 'editar_item_pedido' item.id %}" class="btn btn-warning btn-sm">Editar</a>
               <a href="{% url 'remover_item_pedido' item.id %}" class="btn btn-danger btn-sm" 
@@ -77,35 +73,4 @@
     </tbody>
 </table>
 
-
-
-
-
-
-
-
-
-
-
-
 {% endblock conteudo %}
-
-
-{% block javascript %}
-<script>
-    $('#confirm-btn').confirmation({
-      rootSelector: '#confirm-btn',
-      title: 'Você tem certeza?',
-      btnOkLabel: 'Sim',
-      btnCancelLabel: 'Não',
-      onConfirm: function() {
-        alert('Confirmado!');
-      },
-      onCancel: function() {
-        alert('Cancelado!');
-      }
-    });
-  </script>
-
-
-{% endblock javascript %}

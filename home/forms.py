@@ -11,7 +11,6 @@ class CategoriaForm(forms.ModelForm):
             'ordem': forms.NumberInput(attrs={'class': 'inteiro form-control', 'placeholder': ''}),
         }
 
-    
     def clean_nome(self):
         nome = self.cleaned_data.get('nome')
         if len(nome) < 3:
@@ -23,7 +22,8 @@ class CategoriaForm(forms.ModelForm):
         if ordem <= 0:
             raise forms.ValidationError("O campo ordem deve ser maior que zero.")
         return ordem
-# ************************************Cliente*******************************************    
+
+# ************************************Cliente*******************************************
 class ClienteForm(forms.ModelForm):
     class Meta:
         model = Cliente
@@ -40,18 +40,15 @@ class ClienteForm(forms.ModelForm):
              raise forms.ValidationError("A data de nascimento não pode ser maior que a data atual.")
         return datanasc
     
-# ************************************Produto*******************************************  
+# ************************************Produto*******************************************
 class ProdutoForm(forms.ModelForm):
     class Meta:
         model = Produto
         fields = ['nome', 'preco', 'categoria','img_base64']
         widgets = {
-            # 'categoria': forms.Select(attrs={'class': 'form-control'}),
-            'categoria': forms.HiddenInput(),  #campo oculto para armazenar apenas id
+            'categoria': forms.HiddenInput(),
             'nome':forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nome'}),
             'img_base64': forms.HiddenInput(), 
-            # a classe money mascara a entreda de valores monetários, está em base.html
-            #  jQuery Mask Plugin
             'preco':forms.TextInput(attrs={
                 'class': 'money form-control',
                 'maxlength': 500,
@@ -64,44 +61,76 @@ class ProdutoForm(forms.ModelForm):
             'preco': 'Preço do Produto',
         }
 
-
     def __init__(self, *args, **kwargs):
         super(ProdutoForm, self).__init__(*args, **kwargs)
         self.fields['preco'].localize = True
         self.fields['preco'].widget.is_localized = True   
 
-# ************************************Estoque*******************************************     
-
+# ************************************Estoque*******************************************
 class EstoqueForm(forms.ModelForm):
     class Meta:
         model = Estoque
         fields = ['produto','qtde']
-        
         widgets = {
-            'produto': forms.HiddenInput(),  # Campo oculto para armazenar o ID do produto
+            'produto': forms.HiddenInput(),
             'qtde':forms.TextInput(attrs={'class': 'inteiro form-control',}),
     }
 
-# ************************************Pedido******************************************* 
+# ************************************Pedido*******************************************
 class PedidoForm(forms.ModelForm):
     class Meta:
         model = Pedido
         fields = ['cliente']
         widgets = {
-            'cliente': forms.HiddenInput(),  # Campo oculto para armazenar o ID
+            'cliente': forms.HiddenInput(),
         }
         
-# ************************************DetalhePedido******************************************* 
+# ************************************DetalhePedido*******************************************
 class ItemPedidoForm(forms.ModelForm):
     class Meta:
         model = ItemPedido
         fields = ['pedido','produto', 'qtde']
-
-
         widgets = {
-            'pedido': forms.HiddenInput(),  # Campo oculto para armazenar o ID
-            'produto': forms.HiddenInput(),  # Campo oculto para armazenar o ID
+            'pedido': forms.HiddenInput(),
+            'produto': forms.HiddenInput(),
             'qtde':forms.TextInput(attrs={'class': 'form-control',}),
         }
 
+# ************************************Pagamento*******************************************
+class PagamentoForm(forms.ModelForm):
+    class Meta:
+        model = Pagamento
+        fields = ['pedido','forma','valor']
+        widgets = {
+            'pedido': forms.HiddenInput(),
+            'forma': forms.Select(attrs={'class': 'form-control'}),  
+            'valor': forms.TextInput(attrs={
+                'class': 'money form-control',
+                'maxlength': 500,
+                'placeholder': '0.000,00'
+            }),
+         }
         
+    def __init__(self, *args, **kwargs):
+        super(PagamentoForm, self).__init__(*args, **kwargs)
+        self.fields['valor'].localize = True
+        self.fields['valor'].widget.is_localized = True
+
+    def clean_valor(self):
+        valor = self.cleaned_data.get('valor')
+        if valor <= 0:
+            raise forms.ValidationError("O valor deve ser maior que zero.")
+        return valor
+
+    def clean(self):
+        cleaned_data = super().clean()
+        valor = cleaned_data.get('valor')
+        pedido = cleaned_data.get('pedido')
+
+        if valor and pedido:
+            debito_atual = pedido.debito
+            if self.instance.pk:
+                debito_atual += self.instance.valor
+            
+            if valor > debito_atual:
+                 raise forms.ValidationError(f"O valor do pagamento (R$ {valor}) excede o débito restante (R$ {debito_atual}).")
