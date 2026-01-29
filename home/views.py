@@ -240,23 +240,23 @@ def pedido(request):
 
 
 # ************************************NOVO Pedido******************************************* 
-def novo_pedido(request,id):
+def novo_pedido(request, id):
     if request.method == 'GET':
         try:
             cliente = Cliente.objects.get(pk=id)
         except Cliente.DoesNotExist:
-            # Caso o registro não seja encontrado, exibe a mensagem de erro
             messages.error(request, 'Registro não encontrado')
-            return redirect('cliente')  # Redireciona para a listagem
-        # cria um novo pedido com o cliente selecionado
+            return redirect('cliente')
         pedido = Pedido(cliente=cliente)
-        form = PedidoForm(instance=pedido)# cria um formulario com o novo pedido
-        return render(request, 'pedido/formulario.html',{'form': form,})
-    else: # se for metodo post, salva o pedido.
+        form = PedidoForm(instance=pedido)
+        return render(request, 'pedido/formulario.html', {'form': form})
+    else:
         form = PedidoForm(request.POST)
         if form.is_valid():
             pedido = form.save()
-            return redirect('pedido')
+            # --- ALTERAÇÃO AQUI (Slide Extras) ---
+            # Ao invés de voltar para a lista ('pedido'), vai para os detalhes adicionar itens
+            return redirect('detalhes_pedido', id=pedido.id)
         
 # ************************************Detalhe Pedido******************************************* 
 def detalhes_pedido(request, id):
